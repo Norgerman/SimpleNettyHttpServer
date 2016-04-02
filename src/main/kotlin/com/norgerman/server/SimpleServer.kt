@@ -20,19 +20,19 @@ class SimpleServer(port: Int) {
         val bossGroup: EventLoopGroup = NioEventLoopGroup();
         val workerGroup: EventLoopGroup = NioEventLoopGroup();
         try {
-            val bootStrap: ServerBootstrap = ServerBootstrap();
-
-            bootStrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel::class.java)
-                    .childHandler(object : ChannelInitializer<SocketChannel>() {
-                        override fun initChannel(ch: SocketChannel?) {
-                            if (ch != null) {
-                                ch.pipeline().addLast(HttpDecoder(), ServerHandler());
-                            }
+            val bootStrap: ServerBootstrap = ServerBootstrap().apply {
+                group(bossGroup, workerGroup);
+                channel(NioServerSocketChannel::class.java);
+                childHandler(object : ChannelInitializer<SocketChannel>() {
+                    override fun initChannel(ch: SocketChannel) {
+                        with(ch.pipeline()) {
+                            addLast(HttpDecoder(), ServerHandler());
                         }
-                    })
-                    .option(ChannelOption.SO_BACKLOG, 128)
-                    .childOption(ChannelOption.SO_KEEPALIVE, true);
+                    }
+                });
+                option(ChannelOption.SO_BACKLOG, 128);
+                childOption(ChannelOption.SO_KEEPALIVE, true);
+            };
 
             val future: ChannelFuture = bootStrap.bind(port).sync();
 

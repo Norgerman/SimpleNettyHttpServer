@@ -11,7 +11,7 @@ import io.netty.handler.codec.ByteToMessageDecoder
  * HttpRequestDecoder.kt
  */
 class HttpDecoder : ByteToMessageDecoder() {
-    override fun decode(ctx: ChannelHandlerContext?, `in`: ByteBuf?, out: MutableList<Any>?) {
+    override fun decode(ctx: ChannelHandlerContext, `in`: ByteBuf, out: MutableList<Any>) {
         val input = ByteBufInputStream(`in`);
         var line = input.readLine()
         if (line === null)
@@ -32,7 +32,6 @@ class HttpDecoder : ByteToMessageDecoder() {
         if (request.method != "GET") {
             request.body = ByteBufInputStream(`in`);
         }
-        if (ctx != null)
-            out?.add(HttpContext(request, HttpResponse(ctx, request)));
+        out.add(HttpContext(request, HttpResponse(ctx, request)));
     }
 }

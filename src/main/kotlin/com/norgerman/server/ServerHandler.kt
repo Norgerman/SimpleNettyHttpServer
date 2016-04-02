@@ -10,7 +10,7 @@ import io.netty.channel.ChannelInboundHandlerAdapter
 
 class ServerHandler : ChannelInboundHandlerAdapter() {
 
-    override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
+    override fun channelRead(ctx: ChannelHandlerContext, msg: Any) {
         if (msg is HttpContext) {
             println("Method: ${msg.request.method}");
             println("Path: ${msg.request.path}");
@@ -18,11 +18,13 @@ class ServerHandler : ChannelInboundHandlerAdapter() {
             println();
             println("Headers");
             msg.request.headers.forEach { e -> println("${e.key}: ${e.value}") };
-            if (msg.request.body != null) {
-                println("Body:\r\n");
-                val bytes = ByteArray(msg.request.contentLength.toInt());
-                msg.request.body?.read(bytes, 0, msg.request.contentLength.toInt());
-                println(String(bytes, Charsets.UTF_8));
+            with(msg.request.body) {
+                if (this != null) {
+                    println("Body:\r\n");
+                    val bytes = ByteArray(msg.request.contentLength.toInt());
+                    read(bytes, 0, msg.request.contentLength.toInt());
+                    println(String(bytes, Charsets.UTF_8));
+                }
             }
             msg.response.sendStringAndFinish("Hello world");
         }
